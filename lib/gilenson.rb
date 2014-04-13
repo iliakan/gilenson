@@ -401,7 +401,7 @@ class Gilenson
 
    #Вынимает фрагменты из текста и возвращает массив с фрагментами
    def lift_ignored_elements(text)
-    #     re =  /<\/?[a-z0-9]+("+ # имя тага
+     #     re =  /<\/?[a-z0-9]+("+ # имя тага
      #                              "\s+("+ # повторяющая конструкция: хотя бы один разделитель и тельце
      #                                     "[a-z]+("+ # атрибут из букв, за которым может стоять знак равенства и потом
      #                                              "=((\'[^\']*\')|(\"[^\"]*\")|([0-9@\-_a-z:\/?&=\.]+))"+ #
@@ -409,7 +409,9 @@ class Gilenson
      #                                  ")?"+
      #                            ")*\/?>|\xA2\xA2[^\n]*?==/i;
 
-     re_skipcode = '((<(code|tt)[ >](.*?)<\/(code|tt)>)|(<!\[CDATA\[(.*?)\]\]>))|' if @settings['skip_code']
+     if @settings['skip_code']
+       re_skipcode = '((<(code|tt|script|object|style|pre)[ >](.*?)<\/(code|tt|script|object|style|pre)>)|(<!\[CDATA\[(.*?)\]\]>))|'
+     end
      re =  /(#{re_skipcode}<\/?[a-z0-9]+(\s+([a-z]+(=((\'[^\']*\')|(\"[^\"]*\")|([0-9@\-_a-z:\/?&=\.]+)))?)?)*\/?>)/uim
      tags = text.scan(re).map{ |tag| tag[0] } # первая группа!
      text.gsub!(re, @mark_tag) #маркер тега, мы используем Invalid UTF-sequence для него
