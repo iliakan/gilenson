@@ -498,7 +498,6 @@ class Gilenson
    end
 
    def process_laquo(text)
-     text.gsub!( /\"\"/ui, @quot * 2);
      text.gsub!( /(^|\s|#{@mark_tag}|>|\()\"((#{@mark_tag})*[~0-9ёЁA-Za-zА-Яа-я\-:\/\.])/ui, '\1' + @laquo + '\2');
      _text = '""';
      until _text == text do
