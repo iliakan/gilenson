@@ -44,6 +44,7 @@ class Gilenson
      "(tm)"      => true, # DEPRECATED
      "(p)"       => true, # DEPRECATED
      "arrows"    => true,
+     "ellipsises"=> true
   }.freeze
 
   #:stopdoc:
@@ -272,7 +273,7 @@ class Gilenson
      process_initials(text) if @settings['initials']
 
      # 8b. Троеточия
-     process_ellipsises(text) if @settings["wordglue"]
+     process_ellipsises(text) if @settings["wordglue"] || @settings["ellipsises"]
 
      # 9. Акронимы от Текстиля
      process_acronyms(text) if @settings["acronyms"]
