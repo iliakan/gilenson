@@ -21,17 +21,17 @@ class Gilenson
   SETTINGS = {
      "inches"    => true,    # преобразовывать дюймы в знак дюйма;
      "laquo"     => true,    # кавычки-ёлочки
-     "quotes"    => true,    # кавычки-английские лапки
+     "quotes"    => false,    # кавычки-английские лапки
      "dash"      => true,    # короткое тире (150)
      "emdash"    => true,    # длинное тире двумя минусами (151)
      "initials"  => true,    # тонкие шпации в инициалах
      "copypaste" => false,   # замена непечатных и "специальных" юникодных символов на entities
-     "(c)" => true,    # обрабатывать знаки копирайтов и трейдмарков
-     "acronyms"  => true,    # Акронимы с пояснениями - ЖЗЛ(Жизнь Замечатльных Людей)
+     "(c)" => false,    # обрабатывать знаки копирайтов и трейдмарков
+     "acronyms"  => false,    # Акронимы с пояснениями - ЖЗЛ(Жизнь Замечатльных Людей)
      "+-"        => true,    # спецсимволы, какие - понятно
      "degrees"   => true,    # знак градуса
-     "dashglue"  => true, "wordglue" => true, # приклеивание предлогов и дефисов
-     "spacing"   => true,    # запятые и пробелы, перестановка
+     "dashglue"  => false, "wordglue" => false, # приклеивание предлогов и дефисов
+     "spacing"   => false,    # запятые и пробелы, перестановка
      "phones"    => true,    # обработка телефонов
      "html"      => true,    # разрешение использования тагов html
      "de_nobr"   => false,   # при true все <nobr/> заменяются на <span class="nobr"/>
@@ -248,17 +248,8 @@ class Gilenson
      # 3a. тире длинное
      process_emdash(text) if @settings["emdash"]
 
-     # 4. копимарки и трейдрайты
-     process_copymarks(text) if @settings["(c)"]
-
-     # 5. +/-
-     process_plusmin(text) if @settings["+-"]
-
      # 5a. 12^C
      process_degrees(text) if @settings["degrees"]
-
-     # 5б. стрелочки
-     process_arrows(text) if @settings["arrows"]
 
      # 6. телефоны
      process_phones(text) if @settings["phones"]
@@ -271,12 +262,6 @@ class Gilenson
 
      # 8a. Инициалы
      process_initials(text) if @settings['initials']
-
-     # 8b. Троеточия
-     process_ellipsises(text) if @settings["wordglue"] || @settings["ellipsises"]
-
-     # 9. Акронимы от Текстиля
-     process_acronyms(text) if @settings["acronyms"]
 
      # БЕСКОНЕЧНОСТЬ. Вставляем таги обратно.
      reinsert_fragments(text, tags) if @skip_tags
@@ -477,26 +462,6 @@ class Gilenson
      text.gsub!( /(\s|;)\-\-(\s)/ui, '\1'+@mdash+'\2')
    end
 
-   def process_copymarks(text)
-     # 4. (с)
-     # Можно конечно может быть и так
-     # https://github.com/daekrist/gilenson/commit/c3a96151239281dcef6140616133deb56a099d0f#L1R466
-     # но без тестов это позорище.
-     text.gsub!(/\([сСcC]\)[^\.\,\;\:]/ui) { |m| [@copy, m.split(//u)[-1..-1]].join }
-
-     # 4a. (r)
-     text.gsub!( /\(r\)/ui, '<sup>'+@reg+'</sup>')
-
-     # 4b. (tm)
-     text.gsub!( /\(tm\)|\(тм\)/ui, @trade)
-
-     # 4c. (p)
-     text.gsub!( /\(p\)/ui, @sect)
-   end
-
-   def process_ellipsises(text)
-     text.gsub!( '...', @hellip)
-   end
 
    def process_laquo(text)
      text.gsub!( /(^|\s|#{@mark_tag}|>|\()\"((#{@mark_tag})*[~0-9ёЁA-Za-zА-Яа-я\-:\/\.])/ui, '\1' + @laquo + '\2');
@@ -588,11 +553,14 @@ class Gilenson
      text.gsub!(/(?<=\s)->/ui, @rarr)
    end
 
-   # Подменяет все юникодные entities в тексте на истинные UTF-8-символы
+   # Подменяет все юникодные entities, кроме < > & " '
+   # на истинные UTF-8-символы
    def process_raw_output(text)
      # Все глифы
      @glyph.values.each do | entity |
        next unless entity =~ /^&#(\d+);/
+       raw = entity_to_raw_utf8(entity)
+       next if ['&', '<', '>', '"', "'"].include? (raw)
        text.gsub!(/#{entity}/, entity_to_raw_utf8(entity))
      end
    end
