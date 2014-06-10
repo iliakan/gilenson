@@ -35,7 +35,7 @@ class Gilenson
      "phones"    => true,    # обработка телефонов
      "html"      => true,    # разрешение использования тагов html
      "de_nobr"   => false,   # при true все <nobr/> заменяются на <span class="nobr"/>
-     "raw_output" => false,  # выводить UTF-8 вместо entities
+     "raw_output" => true,  # выводить UTF-8 вместо entities
      "skip_attr" => false,   # при true не отрабатывать типографику в атрибутах тегов
      "skip_code" => true,    # при true не отрабатывать типографику внутри <code/>, <tt/>, CDATA
      "enforce_en_quotes" => false, # только латинские кавычки
@@ -585,7 +585,7 @@ class Gilenson
 
    def process_arrows(text)
      text.gsub!(/<-/ui, @larr)
-     text.gsub!(/\s->/ui, @rarr)
+     text.gsub!(/(?<=\s)->/ui, @rarr)
    end
 
    # Подменяет все юникодные entities в тексте на истинные UTF-8-символы
